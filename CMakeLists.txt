@@ -5,9 +5,8 @@ project(GeMM LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 
-# Set CUDA architectures manually (CMake doesn't support "native" for CUDA)
 # You can check supported archs by: nvcc --list-gpu-arch
-set(CMAKE_CUDA_ARCHITECTURES 120) # 86 = Ampere, change to match your GPU
+set(CMAKE_CUDA_ARCHITECTURES 120)
 
 find_package(CUDAToolkit REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/inc)
