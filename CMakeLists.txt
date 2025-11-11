@@ -13,8 +13,7 @@ find_package(CUDAToolkit REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
 add_executable(gemm_test
-    src/main.cpp
-    cuda/kernel.cu)
+    src/main.cpp)
 
 target_include_directories(gemm_test PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(gemm_test PRIVATE CUDA::cublas CUDA::cudart)
