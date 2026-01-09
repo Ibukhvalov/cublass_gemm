@@ -20,6 +20,7 @@ add_executable(gemm_test
     cuda/cublass.cu
     cuda/naive.cu
     cuda/memory_coalescing.cu
+    cuda/smem_tiling.cu
     )
 
 target_include_directories(gemm_test PRIVATE ${CUDAToolkit_INCLUDE_DIRS})

@@ -40,16 +40,22 @@ BenchmarkResult DoPerformBenchmark(size_t n, std::shared_ptr<Kernel> kernel) {
     return res;
 }
 
-bool DoPerformCheck(int n, std::shared_ptr<Kernel> kernel) {
+ bool DoPerformCheck(int m, int n, int k, std::shared_ptr<Kernel> kernel) {
     KernelRunner runner;
-    runner.SetUpDeviceData(n);
+    runner.SetUpDeviceData(m, n, k);
     return runner.PerformCheck(kernel);
+}
+
+bool DoPerformCheck(int n, std::shared_ptr<Kernel> kernel) {
+    return DoPerformCheck(n, n, n, kernel);
 }
 }
 void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, std::ostream& output) {
     const int test_size = 1 << 8;
     if(!DoPerformCheck(test_size, kernel)) {
         output << "Kernel result is differ from the expected one\n\n";
+    } else if (!DoPerformCheck(test_size / 2, test_size, test_size * 2, kernel)) {
+        output << "Kernel failed for non-squared matrix\n\n";
     } else {
         output << "Kernel has been testes, results are within a precision\n\n";
     }
