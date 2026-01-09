@@ -65,14 +65,19 @@ void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, std::
         sizes.push_back(1 << i);
     }
 
-    output << std::setw(13)
-    << std::left << "Matrix size" << " | " << "GFLOPS" << std::endl;
-    for(int size : sizes) {
+    output << "| Matrix size | GFLOPS |\n";
+    output << "|-------------|--------|\n";
+    for (int size : sizes) {
         auto res = DoPerformBenchmark(size, kernel);
-        output << std::setw(13) << std::fixed << std::setprecision(1)
-        << std::left << size << " | " << res.flops_mean;
-        output << " ±" << res.flops_deviation << std::endl;
+
+        output << "| "
+               << std::setw(11) << std::left << size
+               << " | "
+               << std::fixed << std::setprecision(1)
+               << res.flops_mean << " ± " << res.flops_deviation
+               << " |\n";
     }
+
 }
 
 void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, const std::string& filename) {
