@@ -1,3 +1,7 @@
+#pragma once
+
+#include <iostream>
+
 #define CHECK_CUDA(val) do {   \
 cudaError_t err = (val);       \
 if(err != cudaSuccess) {       \

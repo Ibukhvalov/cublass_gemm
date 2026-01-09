@@ -1,0 +1,7 @@
+Kernel has been testes, results are within a precision
+
+Matrix size   | GFLOPS
+512           | 235.2 ±1.2
+1024          | 257.2 ±7.0
+2048          | 265.9 ±0.8
+4096          | 267.9 ±0.2

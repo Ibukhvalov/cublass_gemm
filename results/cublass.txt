@@ -1,0 +1,7 @@
+Kernel result is differ from the expected one
+
+Matrix size   | GFLOPS
+512           | 867.2 ±113.4
+1024          | 6078.4 ±363.1
+2048          | 19851.4 ±791.6
+4096          | 31043.0 ±190.6
