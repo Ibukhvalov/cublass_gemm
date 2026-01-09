@@ -1,4 +1,5 @@
 .*
+results/
 build.bat
 build
 !.gitignore
