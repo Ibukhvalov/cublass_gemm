@@ -53,8 +53,8 @@ MillisecondsVec BenchmarkCudaKernel (
 
 std::vector<float> KernelRunner::PerformBenchmark(std::shared_ptr<Kernel> kernel) {
     device::Matrix dC({ dA.shape.rows, dB.shape.cols });
-    int warmupNb = 10;
-    int iterationsNb = 10;
+    int warmupNb = 20;
+    int iterationsNb = 100;
     return BenchmarkCudaKernel(warmupNb, iterationsNb,
         [&] {
             kernel->launch(dA, dB, dC);
