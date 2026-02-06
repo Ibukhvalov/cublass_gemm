@@ -69,9 +69,16 @@ bool KernelRunner::PerformCheck(std::shared_ptr<Kernel> kernel) {
     int iterationsNb = 1;
     BenchmarkCudaKernel(warmupNb, iterationsNb,
         [&] {
+            std::cout << "launch\n";
+            std::cout << host::Matrix::CopyFromDevice(dA) << std::endl;
+            std::cout << host::Matrix::CopyFromDevice(dB) << std::endl;
+            std::cout << host::Matrix::CopyFromDevice(dC) << std::endl;
             kernel->launch(dA, dB, dC);
+            std::cout << "end\n";
         });
 
     auto expected_C = host::Matrix::CopyFromDevice(dA) * host::Matrix::CopyFromDevice(dB);
+    auto performed_C = host::Matrix::CopyFromDevice(dC);
+    std::cout << performed_C << std::endl;
     return expected_C == host::Matrix::CopyFromDevice(dC);
 };
