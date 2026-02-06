@@ -7,10 +7,10 @@
 
 
 int main(int argc, char** argv) {
-    BenchmarckCollector::PerformAndFormat(std::make_shared<CublasKernel>(), "./results/cublass.txt");
-    BenchmarckCollector::PerformAndFormat(std::make_shared<NaiveKernel>(), "./results/naive.txt");
-    BenchmarckCollector::PerformAndFormat(std::make_shared<MemoryCoalesingKernel>(),  "./results/memory_coalescing.txt");
-    BenchmarckCollector::PerformAndFormat(std::make_shared<SharedMemoryTilingKernel>(),  "./results/smem_tiling.txt");
+    BenchmarckCollector::PerformAndFormat(std::make_shared<CublasKernel>(), "./results/cublass.md");
+    BenchmarckCollector::PerformAndFormat(std::make_shared<NaiveKernel>(), "./results/naive.md");
+    BenchmarckCollector::PerformAndFormat(std::make_shared<MemoryCoalesingKernel>(),  "./results/memory_coalescing.md");
+    BenchmarckCollector::PerformAndFormat(std::make_shared<SharedMemoryTilingKernel>(),  "./results/smem_tiling.md");
 
     return 0;
 }
