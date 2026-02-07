@@ -17,7 +17,7 @@ add_executable(gemm_test
     src/benchmark_collector.cpp
     src/device/matrix.cpp
     src/host/matrix.cpp
-    cuda/cublass.cu
+    cuda/cublas.cu
     cuda/naive.cu
     cuda/memory_coalescing.cu
     cuda/smem_tiling.cu
