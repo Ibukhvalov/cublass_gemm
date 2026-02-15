@@ -13,6 +13,7 @@ public:
     void SetUpDeviceData(int n);
 
     std::vector<float> PerformBenchmark(std::shared_ptr<Kernel> kernel);
+    void PerformAndPrint(std::shared_ptr<Kernel> kernel);
     bool PerformCheck(std::shared_ptr<Kernel> kernel);
 
 private:

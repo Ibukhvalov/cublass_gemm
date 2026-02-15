@@ -1,4 +1,4 @@
-#include "matrix_data.hpp"
+#include <utils.hpp>
 #include "kernels/naive.cuh"
 
 using fp_t = Kernel::fp_t;
@@ -18,6 +18,6 @@ __global__ void naive_kernel(const fp_t* __restrict__ A, const fp_t* __restrict_
 
 void NaiveKernel::launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) {
     dim3 blockSize(32, 32, 1);
-    dim3 gridSize(ceil(m / 32.f), ceil(n / 32.f));
+    dim3 gridSize(::ceil_div(m, 32), ::ceil_div(n, 32));
     naive_kernel<<<gridSize, blockSize>>>(dA, dB, dC, m, n, k);
 };

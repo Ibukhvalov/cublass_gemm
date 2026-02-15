@@ -1,10 +1,11 @@
 #include "kernel.hpp"
 #include "kernels/smem_tiling.cuh"
 
-using fp_t = Kernel::fp_t;
 
 #define TILE_SIZE 32
 
+
+using fp_t = Kernel::fp_t;
 
 __global__ void shared_memory_tiling_kernel(const fp_t* __restrict__ A, const fp_t* __restrict__ B, fp_t* __restrict__ C, const int m, const int n, const int k) {
     const int col = blockDim.x * blockIdx.x + threadIdx.x;

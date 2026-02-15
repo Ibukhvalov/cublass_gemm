@@ -1,5 +1,4 @@
 .*
 results/
-build.bat
-build
+*build*
 !.gitignore

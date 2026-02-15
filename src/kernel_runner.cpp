@@ -59,8 +59,6 @@ std::vector<float> KernelRunner::PerformBenchmark(std::shared_ptr<Kernel> kernel
         [&] {
             kernel->launch(dA, dB, dC);
         });
-
-
 };
 
 bool KernelRunner::PerformCheck(std::shared_ptr<Kernel> kernel) {
@@ -72,6 +70,24 @@ bool KernelRunner::PerformCheck(std::shared_ptr<Kernel> kernel) {
             kernel->launch(dA, dB, dC);
         });
 
+
     auto expected_C = host::Matrix::CopyFromDevice(dA) * host::Matrix::CopyFromDevice(dB);
-    return expected_C == host::Matrix::CopyFromDevice(dC);
+    auto performed_C = host::Matrix::CopyFromDevice(dC);
+
+    return expected_C == performed_C;
+};
+
+void KernelRunner::PerformAndPrint(std::shared_ptr<Kernel> kernel) {
+    device::Matrix dC({ dA.shape.rows, dB.shape.cols });
+    int warmupNb = 0;
+    int iterationsNb = 1;
+    BenchmarkCudaKernel(warmupNb, iterationsNb,
+        [&] {
+            kernel->launch(dA, dB, dC);
+        });
+
+    auto expected_C = host::Matrix::CopyFromDevice(dA) * host::Matrix::CopyFromDevice(dB);
+    auto performed_C = host::Matrix::CopyFromDevice(dC);
+    std::cout << "Expected:\n" << expected_C << std::endl;
+    std::cout << "Performed:\n" << performed_C << std::endl;
 };

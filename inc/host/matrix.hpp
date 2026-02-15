@@ -22,8 +22,8 @@ struct Allocator : public FPType {
 class Matrix : public MatrixData<Allocator> {
 public:
     static Matrix CreateRandom(Shape shape, fp_t deviation = 10);
+    static Matrix CreateConsecutive(Shape shape);
     static Matrix CopyFromDevice(const device::Matrix& deviceMatrix);
-
 protected:
     using MatrixData<Allocator>::MatrixData;
 };
