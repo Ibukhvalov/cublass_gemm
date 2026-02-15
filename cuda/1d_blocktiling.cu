@@ -1,59 +1,74 @@
 #include "kernel.hpp"
 #include "utils.hpp"
-#include "kernels/smem_tiling.cuh"
+#include "kernels/1d_blocktiling.cuh"
+#include <vector_types.h>
 
 
-#define BM 64
-#define BN 64
-#define BK 8
-#define TM 8
+constexpr int BM = 64;
+constexpr int BN = 64;
+constexpr int BK = 8;
+constexpr int TM = 8;
 
 
+ using fp_t = Kernel::fp_t;
 
-using fp_t = Kernel::fp_t;
+__global__ void block_tiling_1d_kernel(const fp_t* __restrict__ A, const fp_t* __restrict__ B, fp_t* __restrict__ C, const int m, const int n, const int k) {
+    __shared__ fp_t As[BM][BK];
+    __shared__ fp_t Bs[BK][BN];
 
-__global__ void shared_memory_tiling_kernel(const fp_t* __restrict__ A, const fp_t* __restrict__ B, fp_t* __restrict__ C, const int m, const int n, const int k) {
-    const int col = blockDim.x * blockIdx.x + threadIdx.x;
-    const int row = blockDim.y * blockIdx.y + threadIdx.y;
+    // (row, col) is a upper-left corner of the current block
+    const uint2 blockStart = {blockIdx.y * BM, blockIdx.x * BN};
 
-    __shared__ float As[TILE_SIZE][TILE_SIZE];
-    __shared__ float Bs[TILE_SIZE][TILE_SIZE];
-
-    fp_t acc[TM]{0};
-    int tilesNb = ((k - 1) / TILE_SIZE) + 1;
+    fp_t acc[TM] = {0};
+    int tilesNb = ((k - 1) / BK) + 1;
     for(int tileIdx = 0; tileIdx < tilesNb; ++tileIdx) {
-        int tileShift = tileIdx * TILE_SIZE;
 
+        int tileShift = tileIdx * BK;
         // load As
-        int colA = threadIdx.x + tileShift;
-        if(row < m && colA < k)
-            As[threadIdx.y][threadIdx.x] = A[row * k + colA];
+        int colA = threadIdx.y + tileShift;
+        int rowA = blockStart.x + threadIdx.x;
+        if(rowA < m && colA < k)
+            As[threadIdx.x][threadIdx.y] = A[rowA * k + colA];
         else
-            As[threadIdx.y][threadIdx.x] = 0.0f;
+            As[threadIdx.x][threadIdx.y] = 0.0f;
+
 
         // load Bs
+        int colB = blockStart.y + threadIdx.x;
         int rowB = threadIdx.y + tileShift;
-        if(rowB < k && col < n)
-            Bs[threadIdx.y][threadIdx.x] = B[rowB * n + col];
+        if (rowB < k && colB < n)
+            Bs[threadIdx.y][threadIdx.x] = B[rowB * n + colB];
         else
             Bs[threadIdx.y][threadIdx.x] = 0.0f;
 
         __syncthreads();
 
-        //#pragma unroll
-        for(int i = 0; i < TILE_SIZE; ++i)
-            acc += As[threadIdx.y][i] * Bs[i][threadIdx.x];
+        for(int dotIdx = 0; dotIdx < BK; ++dotIdx) {
+            fp_t b = Bs[dotIdx][threadIdx.x];
+            for(int resIdx = 0; resIdx < TM; ++resIdx) {
+                fp_t a = As[threadIdx.y * TM + resIdx][dotIdx];
+                acc[resIdx] += a * b;
+            }
+        }
 
         __syncthreads();
+
     }
 
-    if(row < m && col < n)
-        C[row * n + col] = acc;
+    for(int resIdx = 0; resIdx < TM; ++resIdx) {
+        int row = blockStart.x + resIdx + threadIdx.y * TM;
+        int col = blockStart.y + threadIdx.x;
+        if(row < m && col < n) {
+            C[row * n + col] = acc[resIdx];
+        }
+    }
 }
 
- void SharedMemoryTilingKernel::launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) {
+ void BlockTiling1DKernel::launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) {
+    assert(BN == BM);
     assert(BM % TM == 0);
-    dim3 blockSize(BN, BM / TM);
+    assert(BK == BM / TM);
+    dim3 blockSize(BN, BK);
     dim3 gridSize(::ceil_div(n, BN), ::ceil_div(m, BM));
-    shared_memory_tiling_kernel<<<gridSize, blockSize>>>(dA, dB, dC, m, n, k);
+    block_tiling_1d_kernel<<<gridSize, blockSize>>>(dA, dB, dC, m, n, k);
 };

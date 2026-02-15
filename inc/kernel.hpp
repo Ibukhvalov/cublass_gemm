@@ -15,10 +15,7 @@ public:
         assert(dA.shape.rows == dC.shape.rows);
         assert(dB.shape.cols == dC.shape.cols);
         assert(dA.shape.cols == dB.shape.rows);
-
-        std::cout << "o\n";
         launch(dA.data, dB.data, dC.data, dC.shape.rows, dC.shape.cols, dA.shape.cols);
-        std::cout << "o\n";
     }
 
 private:

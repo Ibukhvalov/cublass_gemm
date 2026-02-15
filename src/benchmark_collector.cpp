@@ -54,8 +54,10 @@ void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, std::
     const int test_size = 1 << 8;
     if(!DoPerformCheck(test_size, kernel)) {
         output << "Kernel result is differ from the expected one\n\n";
+        return;
     } else if (!DoPerformCheck(test_size / 2, test_size, test_size * 2, kernel)) {
         output << "Kernel failed for non-squared matrix\n\n";
+        return;
     } else {
         output << "Kernel has been testes, results are within a precision\n\n";
     }
@@ -82,6 +84,10 @@ void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, std::
 
 void BenchmarckCollector::PerformAndFormat(std::shared_ptr<Kernel> kernel, const std::string& filename) {
     std::ofstream output(filename);
+    if (!output.good()) {
+        std::cerr << filename << " failed to open\n";
+        return;
+    }
     PerformAndFormat(kernel, output);
 
     if(output.good()) {

@@ -28,6 +28,19 @@ Matrix Matrix::CreateRandom(Shape shape, fp_t deviation) {
     return matrix;
 };
 
+Matrix Matrix::CreateConsecutive(Shape shape) {
+    Matrix matrix(shape);
+    fp_t i = 1;
+    std::generate(matrix.data, matrix.data + matrix.shape.elements_nb(), [&]() {
+        fp_t r = i;
+        i += fp_t(1);
+        return r;
+        });
+
+    return matrix;
+};
+
+
 Matrix Matrix::CopyFromDevice(const device::Matrix &deviceMatrix) {
     Matrix matrix(deviceMatrix.shape);
     CHECK_CUDA(cudaMemcpy(matrix.data, deviceMatrix.data, deviceMatrix.bytes_size(), cudaMemcpyDeviceToHost));

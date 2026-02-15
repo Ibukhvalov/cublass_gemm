@@ -10,7 +10,7 @@ set(CMAKE_CUDA_ARCHITECTURES 120)
 find_package(CUDAToolkit REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
-add_executable(gemm_test
+add_executable(gemm
     src/main.cpp
     src/kernel_runner.cpp
     src/matrix_data.cpp
@@ -21,7 +21,11 @@ add_executable(gemm_test
     cuda/naive.cu
     cuda/memory_coalescing.cu
     cuda/smem_tiling.cu
+    cuda/1d_blocktiling.cu
     )
 
-target_include_directories(gemm_test PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(gemm_test PRIVATE CUDA::cublas CUDA::cudart)
+#set(CMAKE_CUDA_FLAGS_DEBUG "-G -lineinfo")
+#set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+
+target_include_directories(gemm PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+target_link_libraries(gemm PRIVATE CUDA::cublas CUDA::cudart)
