@@ -1,7 +1,6 @@
 #pragma once
 
 #include "matrix_data.hpp"
-#include <cstddef>
 #include <ostream>
 
 namespace device {

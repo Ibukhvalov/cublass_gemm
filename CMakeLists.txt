@@ -22,6 +22,7 @@ add_executable(gemm
     cuda/memory_coalescing.cu
     cuda/smem_tiling.cu
     cuda/1d_blocktiling.cu
+    cuda/2d_blocktiling.cu
     )
 
 #set(CMAKE_CUDA_FLAGS_DEBUG "-G -lineinfo")

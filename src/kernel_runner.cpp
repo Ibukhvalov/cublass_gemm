@@ -4,7 +4,6 @@
 #include "device/matrix.hpp"
 #include "host/matrix.hpp"
 #include "macro.hpp"
-#include <chrono>
 #include <vector>
 
 
@@ -69,7 +68,6 @@ bool KernelRunner::PerformCheck(std::shared_ptr<Kernel> kernel) {
         [&] {
             kernel->launch(dA, dB, dC);
         });
-
 
     auto expected_C = host::Matrix::CopyFromDevice(dA) * host::Matrix::CopyFromDevice(dB);
     auto performed_C = host::Matrix::CopyFromDevice(dC);
