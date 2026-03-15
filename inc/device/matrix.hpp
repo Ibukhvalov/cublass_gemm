@@ -6,13 +6,12 @@
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
-namespace host {
-class Matrix;
-};
-
 namespace device {
 
-struct Allocator : public FPType {
+template <typename T>
+struct Allocator  {
+    using fp_t = T;
+
     static fp_t* allocate(int elements_nb) {
         fp_t* data;
         CHECK_CUDA(cudaMalloc(&data, elements_nb * sizeof(fp_t)));
@@ -23,12 +22,10 @@ struct Allocator : public FPType {
     }
 };
 
-class Matrix : public MatrixData<Allocator> {
-public:
-    static Matrix CopyFromHost(const host::Matrix& hostMatrix);
-
+template <typename fp_t = float>
+class Matrix : public MatrixData<Allocator<fp_t>> {
 protected:
-    using MatrixData<Allocator>::MatrixData;
+    using MatrixData<Allocator<fp_t>>::MatrixData;
 };
 
 };

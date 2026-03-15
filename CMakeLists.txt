@@ -12,18 +12,15 @@ include_directories(${PROJECT_SOURCE_DIR}/inc)
 
 add_executable(gemm
     src/main.cpp
-    src/kernel_runner.cpp
     src/matrix_data.cpp
-    src/benchmark_collector.cpp
-    src/device/matrix.cpp
-    src/host/matrix.cpp
     cuda/cublas.cu
     cuda/naive.cu
     cuda/memory_coalescing.cu
     cuda/smem_tiling.cu
     cuda/1d_blocktiling.cu
     cuda/2d_blocktiling.cu
-    )
+    cuda/tiling_tensor_core.cu
+)
 
 #set(CMAKE_CUDA_FLAGS_DEBUG "-G -lineinfo")
 #set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)

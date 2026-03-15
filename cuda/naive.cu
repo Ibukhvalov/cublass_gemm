@@ -1,7 +1,6 @@
 #include <utils.hpp>
 #include "kernels/naive.cuh"
 
-using fp_t = Kernel::fp_t;
 
 __global__ void naive_kernel(const fp_t* __restrict__ A, const fp_t* __restrict__ B, fp_t* __restrict__ C, int m, int n, int k) {
     const int row = blockDim.x * blockIdx.x + threadIdx.x;

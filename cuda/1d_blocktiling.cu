@@ -10,8 +10,6 @@ constexpr int BK = 8;
 constexpr int TM = 8;
 
 
- using fp_t = Kernel::fp_t;
-
 __global__ void block_tiling_1d_kernel(const fp_t* __restrict__ A, const fp_t* __restrict__ B, fp_t* __restrict__ C, const int m, const int n, const int k) {
     __shared__ fp_t As[BM][BK];
     __shared__ fp_t Bs[BK][BN];

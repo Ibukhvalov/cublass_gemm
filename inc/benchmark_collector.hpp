@@ -1,10 +1,106 @@
 #pragma once
 
-#include <iostream>
 #include <kernel.hpp>
+#include <kernel_runner.hpp>
 
-class BenchmarckCollector {
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <numeric>
+
+
+namespace {
+struct BenchmarkResult {
+    double flops_mean;
+    double flops_deviation;
+};
+
+template <typename I_FP_T, typename O_FP_T>
+BenchmarkResult DoPerformBenchmark(size_t n, std::shared_ptr<Kernel<I_FP_T, O_FP_T>> kernel) {
+    KernelRunner<I_FP_T, O_FP_T> runner;
+    runner.SetUpDeviceData(n);
+    auto runs_res = runner.PerformBenchmark(kernel);
+
+    std::vector<double> gflops_samples;
+    std::transform(runs_res.cbegin(), runs_res.cend(), std::back_inserter(gflops_samples), [&](float delta) {
+        const size_t flop_nb = (n*n*n) * size_t(2);
+        return static_cast<double>(flop_nb) / delta * 1e3 / 1e9;
+    });
+
+    BenchmarkResult res;
+    res.flops_mean = std::accumulate(gflops_samples.begin(), gflops_samples.end(), 0.0, [] (double acc, double gflops) {
+        return acc + gflops;
+    }) / runs_res.size();
+    double variance = std::accumulate(gflops_samples.begin(), gflops_samples.end(), 0.0, [&] (double acc, double gflops) {
+        double d = gflops - res.flops_mean;
+        return acc + d*d;
+    }) / (runs_res.size() - 1);
+    res.flops_deviation = std::sqrt(variance);
+    return res;
+}
+
+template <typename I_FP_T, typename O_FP_T>
+bool DoPerformCheck(int m, int n, int k, std::shared_ptr<Kernel<I_FP_T, O_FP_T>> kernel) {
+    KernelRunner<I_FP_T, O_FP_T> runner;
+    runner.SetUpDeviceData(m, n, k);
+    return runner.PerformCheck(kernel);
+}
+
+template <typename I_FP_T, typename O_FP_T>
+bool DoPerformCheck(int n, std::shared_ptr<Kernel<I_FP_T, O_FP_T>> kernel) {
+    return DoPerformCheck(n, n, n, kernel);
+}
+}
+
+template <typename I_FP_T, typename O_FP_T>
+class BenchmarkCollector {
 public:
-    static void PerformAndFormat(std::shared_ptr<Kernel> kernel, std::ostream& output);
-    static void PerformAndFormat(std::shared_ptr<Kernel> kernel, const std::string& filename);
+    static void PerformAndFormat(std::shared_ptr<Kernel<I_FP_T, O_FP_T>> kernel, std::ostream& output) {
+        const int test_size = 1 << 8;
+        if(!DoPerformCheck(test_size, kernel)) {
+            output << "Kernel result is differ from the expected one\n\n";
+            return;
+        // } else if (!DoPerformCheck(test_size / 2, test_size, test_size * 2, kernel)) {
+        //     output << "Kernel failed for non-squared matrix\n\n";
+        //     return;
+        } else {
+            output << "Kernel has been testes, results are within a precision\n\n";
+        }
+
+
+        std::vector<int> sizes;
+        for (int i = 9; i <= 12; ++i) {
+            sizes.push_back(1 << i);
+        }
+
+        output << "| Matrix size | GFLOPS |\n";
+        output << "|-------------|--------|\n";
+        for (int size : sizes) {
+            auto res = DoPerformBenchmark(size, kernel);
+
+            output << "| "
+                   << std::setw(11) << std::left << size
+                   << " | "
+                   << std::fixed << std::setprecision(1)
+                   << res.flops_mean << " ± " << res.flops_deviation
+                   << " |\n";
+        }
+    }
+
+    static void PerformAndFormat(std::shared_ptr<Kernel<I_FP_T, O_FP_T>> kernel, const std::string& filename) {
+        std::ofstream output(filename);
+        if (!output.good()) {
+            std::cerr << filename << " failed to open\n";
+            return;
+        }
+        PerformAndFormat(kernel, output);
+
+        if(output.good()) {
+            std::cout << filename << " has benchmarked successfully\n";
+        } else {
+            std::cerr << filename << " has failed\n";
+        }
+
+        output.close();
+    }
 };

@@ -13,9 +13,6 @@ struct Shape {
 bool operator==(const Shape& left, const Shape& right);
 bool operator!=(const Shape& left, const Shape& right);
 
-struct FPType {
-    using fp_t = float;
-};
 
 // Row-Major order
 template <typename Allocator>

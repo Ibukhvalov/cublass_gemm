@@ -1,7 +1,6 @@
 #include "kernel.hpp"
 #include "kernels/memory_coalescing.cuh"
 
-using fp_t = Kernel::fp_t;
 
 __global__ void memory_coalescing_kernel(fp_t* A, fp_t* B, fp_t* C, int m, int n, int k) {
     const int col = blockDim.x * blockIdx.x + threadIdx.x;

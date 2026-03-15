@@ -10,8 +10,6 @@
 #include "kernel.hpp"
 
 
-using fp_t = Kernel::fp_t;
-
 void CublasKernel::launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) {
     const float alpha = 1.0f, beta = 0.0f;
 
@@ -29,4 +27,6 @@ void CublasKernel::launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) {
         dC, CUDA_R_32F, n,
         CUBLAS_COMPUTE_32F_FAST_TF32,
         CUBLAS_GEMM_DEFAULT_TENSOR_OP));
+
+    CHECK_CUBLAS(cublasDestroy(handle));
 };

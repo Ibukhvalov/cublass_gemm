@@ -5,13 +5,12 @@
 
 
 // MxK @ KxN = MxN
+template <typename I_FP_T, typename O_FP_T = I_FP_T>
 class Kernel {
 public:
-    using fp_t = device::Allocator::fp_t;
-
     virtual ~Kernel() = default;
 
-    void launch(device::Matrix& dA, device::Matrix& dB, device::Matrix& dC) {
+    void launch(device::Matrix<I_FP_T>& dA, device::Matrix<I_FP_T>& dB, device::Matrix<O_FP_T>& dC) {
         assert(dA.shape.rows == dC.shape.rows);
         assert(dB.shape.cols == dC.shape.cols);
         assert(dA.shape.cols == dB.shape.rows);
@@ -19,5 +18,5 @@ public:
     }
 
 private:
-    virtual void launch(fp_t* dA, fp_t* dB, fp_t* dC, int m, int n, int k) = 0;
+    virtual void launch(I_FP_T* dA, I_FP_T* dB, O_FP_T* dC, int m, int n, int k) = 0;
 };
