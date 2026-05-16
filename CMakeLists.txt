@@ -19,7 +19,12 @@ add_executable(gemm
     cuda/smem_tiling.cu
     cuda/1d_blocktiling.cu
     cuda/2d_blocktiling.cu
-    cuda/tiling_tensor_core.cu
+    cuda/tf32_tensor_core_block128x128.cu
+    cuda/tf32_tensor_core_ptx_async.cu
+    cuda/tf32_tensor_core_ptx_async_warp32x64.cu
+    cuda/tf32_tensor_core_ptx_async_block128x256_warp32x64.cu
+    cuda/tf32_tensor_core_ptx_async_block128x256_warp32x64_aligned.cu
+    cuda/tf32_tensor_core_ptx_async_block128x256_warp32x64_bskew_aligned.cu
 )
 
 #set(CMAKE_CUDA_FLAGS_DEBUG "-G -lineinfo")

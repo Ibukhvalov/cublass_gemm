@@ -1,26 +1,42 @@
 #include "benchmark_collector.hpp"
-#include "kernels/1d_blocktiling.cuh"
 #include "kernels/cublas.cuh"
 #include "kernels/naive.cuh"
 #include "kernels/memory_coalescing.cuh"
-#include "kernels/smem_tiling.cuh"
 #include "kernels/1d_blocktiling.cuh"
 #include "kernels/2d_blocktiling.cuh"
-#include "kernels/tiling_tensor_core.cuh"
+#include "kernels/tf32_tensor_core_block128x128.cuh"
+#include "kernels/tf32_tensor_core_ptx_async.cuh"
+#include "kernels/tf32_tensor_core_ptx_async_warp32x64.cuh"
+#include "kernels/tf32_tensor_core_ptx_async_block128x256_warp32x64.cuh"
+#include "kernels/tf32_tensor_core_ptx_async_block128x256_warp32x64_aligned.cuh"
+#include "kernels/tf32_tensor_core_ptx_async_block128x256_warp32x64_bskew_aligned.cuh"
 #include <memory>
+#include <vector>
+
+#include "kernels/smem_tiling.cuh"
 
 
 using FloatBenchmarkCollector = BenchmarkCollector<float, float>;
-using HalfBenchmarkCollector = BenchmarkCollector<half, float>;
 
 
-int main(int argc, char** argv) {
-    // FloatBenchmarkCollector::PerformAndFormat(std::make_shared<NaiveKernel>(), "./results/naive.md");
-    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<CublasKernel>(), "./results/cublas.md");
-    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<MemoryCoalesingKernel>(),  "./results/memory_coalescing.md");
-    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<SharedMemoryTilingKernel>(),  "./results/smem_tiling.md");
-    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<BlockTiling1DKernel>(), "./results/1d_blocktiling.md");
-    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<BlockTiling2DKernel>(), "./results/2d_blocktiling.md");
-    HalfBenchmarkCollector::PerformAndFormat(std::make_shared<TilingTensorCoreKernel>(),  "./results/tiling_tensor_core.md");
+int main() {
+    const std::vector<int> tiny_sizes = {512, 1024};
+    const std::vector<int> cuda_core_sizes = {512, 1024, 2048, 4096};
+    const std::vector<int> tensor_core_sizes = {512, 1024, 2048, 4096, 8192, 16384};
+
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<NaiveKernel>(), "./results/naive.md", tiny_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<MemoryCoalesingKernel>(), "./results/memory_coalescing.md", cuda_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<BlockTiling1DKernel>(), "./results/1d_blocktiling.md", cuda_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<BlockTiling2DKernel>(), "./results/2d_blocktiling.md", cuda_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCoreBlock128x128Kernel>(), "./results/tf32_tensor_block128x128.md", tensor_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCorePtxAsyncKernel>(), "./results/tf32_tensor_ptx_async.md", tensor_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCorePtxAsyncWarp32x64Kernel>(), "./results/tf32_tensor_ptx_async_warp32x64.md", tensor_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCorePtxAsyncBlock128x256Warp32x64Kernel>(), "./results/tf32_tensor_ptx_async_block128x256_warp32x64.md", tensor_core_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCorePtxAsyncBlock128x256Warp32x64AlignedKernel>(), "./results/tf32_tensor_ptx_async_block128x256_warp32x64_aligned.md", tensor_core_sizes);
+
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<SharedMemoryTilingKernel>(), "./results/smem_tiling.md", tiny_sizes);
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<Tf32TensorCorePtxAsyncBlock128x256Warp32x64BskewAlignedKernel>(), "./results/tf32_tensore_async_bskew_aligned.md", tensor_core_sizes);
+
+    FloatBenchmarkCollector::PerformAndFormat(std::make_shared<CublasKernel>(), "./results/cublas.md", tensor_core_sizes);
     return 0;
 }
